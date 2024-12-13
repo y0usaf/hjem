@@ -108,7 +108,13 @@
       files = mkOption {
         default = {};
         type = attrsOf (fileType config.directory);
-        description = "";
+        description = "Files to be managed, inserted to relevant systemd-tmpfiles rules";
+      };
+
+      packages = mkOption {
+        type = with lib.types; listOf package;
+        default = [];
+        description = "Packages for ${config.user}";
       };
     };
   };
@@ -122,6 +128,11 @@ in {
   };
 
   config = {
+    users.users = mapAttrs' (name: {packages, ...}: {
+      inherit name;
+      value.packages = packages;
+    }) (filterAttrs (_: u: u.packages != []) config.homes);
+
     systemd.user.tmpfiles.users = mapAttrs' (name: {files, ...}: {
       inherit name;
       value.rules = map (
