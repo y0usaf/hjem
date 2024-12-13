@@ -108,13 +108,13 @@
       files = mkOption {
         default = {};
         type = attrsOf (fileType config.directory);
-        description = "";
+        description = "Files to be managed, inserted to relevant systemd-tmpfiles rules";
       };
 
       packages = mkOption {
         type = with lib.types; listOf package;
         default = [];
-        description = "";
+        description = "Packages for ${config.user}";
       };
     };
   };
