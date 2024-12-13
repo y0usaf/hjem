@@ -110,6 +110,12 @@
         type = attrsOf (fileType config.directory);
         description = "";
       };
+
+      packages = mkOption {
+        type = with lib.types; listOf package;
+        default = [];
+        description = "";
+      };
     };
   };
 in {
@@ -122,6 +128,11 @@ in {
   };
 
   config = {
+    users.users = mapAttrs' (name: {packages, ...}: {
+      inherit name;
+      value.packages = packages;
+    }) (filterAttrs (_: u: u.packages != []) config.homes);
+
     systemd.user.tmpfiles.users = mapAttrs' (name: {files, ...}: {
       inherit name;
       value.rules = map (
