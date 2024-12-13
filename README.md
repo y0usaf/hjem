@@ -8,8 +8,18 @@ Hjem ("home" in Danish) is a NixOS module that implements a simple and
 streamlined way to manage files in your `$HOME`, such as but not limited to
 files in your `~/.config`.
 
-It exposes a very basic interface with multi-tenant capabilities, which you may
-use to manage individual users' homes by leveraging the module system.
+### Features
+
+1. Multi-user by default
+2. Small, simple codebase with minimal abstraction
+3. Powerful `$HOME` management functionality and potential
+4. Systemd-native file management via systemd-tmpfiles
+5. Extensible for 3rd-party use
+
+### Implementation
+
+Hjem exposes a very basic interface with multi-tenant capabilities, which you
+may use to manage individual users' homes by leveraging the module system.
 
 ```nix
 {
@@ -22,6 +32,11 @@ use to manage individual users' homes by leveraging the module system.
   };
 }
 ```
+
+Each attribute under `homes`, e.g., `homes.alice` and `homes.jane` represent a
+user managed via `users.users` in NixOS. If a user does not exist, then Hjem
+will refuse to manage their `$HOME` by filtering non-existent users in file
+creation.
 
 ## Module Interface
 
