@@ -40,6 +40,11 @@ may use to manage individual users' homes by leveraging the module system.
       # Write a text file in `/homes/alice/.config/foo`
       # with the contents bar
       ".config/foo".text = "bar";
+
+      # Alternatively, create the file source using a writer.
+      # This can be used to generate config files with various
+      # formats expected by different programs.
+      ".config/bar".source = pkgs.writeTextFile "file-foo" "file contents";
     };
   };
 }
