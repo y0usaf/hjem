@@ -1,10 +1,22 @@
-# Hjem
+<h1 id="header" align="center">
+  Hjem
+</h1>
 
-A streamlined way to manage your `$HOME` for NixOS systems.
+<div align="center">
+  A streamlined way to manage your <code>$HOME</code> for NixOS systems.
+</div>
+
+<div align="center">
+  <br/>
+  <a href="#what-is-this">Synopsis</a><br/>
+  <a href="#features">Features</a> | <a href="#module-interface">Interface</a><br/>
+  <a href="#things-to-do">Future Plans</a>
+  <br/>
+</div>
 
 ## What is this?
 
-Hjem ("home" in Danish) is a NixOS module that implements a simple and
+**Hjem** ("home" in Danish) is a NixOS module that implements a simple and
 streamlined way to manage files in your `$HOME`, such as but not limited to
 files in your `~/.config`.
 
@@ -94,6 +106,25 @@ The systemd-tmpfiles module lacks a good way of cleaning up dangling lists,
 e.g., from files that are no longer linked. To tackle this problem, a _manifest_
 of files can be used to diff said manifest during switch and remove files that
 are no longer managed.
+
+### Alternative or/and configurable file linking mechanisms
+
+Hjem currently utilizes systemd-tmpfiles to ensure the files are linked in
+place. While this is a safe and powerful way to ensure files are placed in their
+desired locations, it is not very robust. We may consider adding an alternative
+linker, e.g., in Bash that expands upon systemd-tmpfiles functionality with
+additional functionality.
+
+Alternatively, similar to how NixOS handles external bootloaders, we may
+consider a rebuild "hook" for allowing alternative linking methods where the
+module system exposes the files configuration to a package user provides.
+
+## Attributions
+
+Special thanks to [Nixpkgs](https://github.com/nixOS/nixpkgs) and
+[Home-Manager](https://github.com/nix-community/home-manager). The interface of
+the `homes` module is inspired by Home-Manager's `home.file` and nixpkgs'
+`users.users` modules. Hjem would not be possible without any of those projects.
 
 ## License
 
