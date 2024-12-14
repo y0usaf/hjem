@@ -112,7 +112,11 @@
       directory = mkOption {
         type = path;
         default = usrCfg.${config.user}.home;
-        description = "The directory in which configuration files will be created for the user.";
+        defaultText = "Home directory inherited from {option}`users.users.${name}.home`";
+        description = ''
+          The home directory for the user, to which files configured in
+          {option}`homes.<name>.files` will be relative to by default.
+        '';
       };
 
       files = mkOption {
