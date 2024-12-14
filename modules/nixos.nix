@@ -66,6 +66,16 @@
           '';
         };
 
+        clobber = mkOption {
+          type = bool;
+          default = false;
+          example = true;
+          description = ''
+            Whether to "clobber" existing target paths. While `true`, tmpfile rules will be constructed
+            with `L+` (*re*create) instead of `L` (create) type.
+          '';
+        };
+
         relativeTo = mkOption {
           internal = true;
           type = path;
@@ -138,9 +148,17 @@ in {
       value.rules = map (
         file: let
           # L+ will recrate, i.e., clobber existing files.
-          rulesList = ["L+" file.target "- - - -" file.source];
+          mode =
+            if file.clobber
+            then "L+"
+            else "L";
+
+          # Constructed rule string that consists of the type, target, and source
+          # of a tmpfile. Files with 'null' sources are filtered before the rule
+          # is constructed.
+          ruleString = [mode file.target "- - - -" file.source];
         in
-          concatStringsSep " " rulesList
+          concatStringsSep " " ruleString
       ) (filter (f: f.enable && f.source != null) (attrValues files));
     }) (filterAttrs (_: u: u.files != {}) config.homes);
   };
