@@ -4,9 +4,9 @@
   lib,
   ...
 }: let
-  inherit (lib.modules) mkIf mkDefault;
+  inherit (lib.modules) mkIf mkDefault mkDerivedConfig;
   inherit (lib.options) mkOption mkEnableOption;
-  inherit (lib.strings) hasPrefix concatStringsSep;
+  inherit (lib.strings) hasPrefix;
   inherit (lib.lists) filter map;
   inherit (lib.attrsets) filterAttrs mapAttrs' attrValues;
   inherit (lib.types) bool submodule str path attrsOf nullOr lines;
@@ -18,6 +18,7 @@
       name,
       target,
       config,
+      options,
       ...
     }: {
       options = {
@@ -59,7 +60,7 @@
         };
 
         executable = mkOption {
-          type = nullOr bool;
+          type = bool;
           default = false;
           description = ''
             Whether to set the execute bit on the target file.
@@ -88,7 +89,7 @@
 
       config = {
         target = mkDefault name;
-        source = mkIf (config.text != null) (mkDefault (pkgs.writeTextFile {
+        source = mkIf (config.text != null) (mkDerivedConfig options.text (pkgs.writeTextFile {
           inherit name;
           inherit (config) text executable;
         }));
@@ -151,18 +152,16 @@ in {
       inherit name;
       value.rules = map (
         file: let
-          # L+ will recrate, i.e., clobber existing files.
+          # L+ will recreate, i.e., clobber existing files.
           mode =
             if file.clobber
             then "L+"
             else "L";
-
+        in
           # Constructed rule string that consists of the type, target, and source
           # of a tmpfile. Files with 'null' sources are filtered before the rule
           # is constructed.
-          ruleString = [mode file.target "- - - -" file.source];
-        in
-          concatStringsSep " " ruleString
+          "${mode} '${file.target}' - - - - ${file.source}"
       ) (filter (f: f.enable && f.source != null) (attrValues files));
     }) (filterAttrs (_: u: u.files != {}) config.homes);
   };
