@@ -60,7 +60,7 @@
         };
 
         executable = mkOption {
-          type = nullOr bool;
+          type = bool;
           default = false;
           description = ''
             Whether to set the execute bit on the target file.
