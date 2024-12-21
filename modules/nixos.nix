@@ -152,7 +152,7 @@ in {
       inherit name;
       value.rules = map (
         file: let
-          # L+ will recrate, i.e., clobber existing files.
+          # L+ will recreate, i.e., clobber existing files.
           mode =
             if file.clobber
             then "L+"
@@ -161,7 +161,7 @@ in {
           # Constructed rule string that consists of the type, target, and source
           # of a tmpfile. Files with 'null' sources are filtered before the rule
           # is constructed.
-          ruleString = [mode file.target "- - - -" file.source];
+          ruleString = [mode "'${file.target}' - - - -" file.source];
         in
           concatStringsSep " " ruleString
       ) (filter (f: f.enable && f.source != null) (attrValues files));
