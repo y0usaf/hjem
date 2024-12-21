@@ -4,7 +4,7 @@
   lib,
   ...
 }: let
-  inherit (lib.modules) mkIf mkDefault;
+  inherit (lib.modules) mkIf mkDefault mkDerivedConfig;
   inherit (lib.options) mkOption mkEnableOption;
   inherit (lib.strings) hasPrefix concatStringsSep;
   inherit (lib.lists) filter map;
@@ -18,6 +18,7 @@
       name,
       target,
       config,
+      options,
       ...
     }: {
       options = {
@@ -88,7 +89,7 @@
 
       config = {
         target = mkDefault name;
-        source = mkIf (config.text != null) (mkDefault (pkgs.writeTextFile {
+        source = mkIf (config.text != null) (mkDerivedConfig options.text (pkgs.writeTextFile {
           inherit name;
           inherit (config) text executable;
         }));
