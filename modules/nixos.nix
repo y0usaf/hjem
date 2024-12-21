@@ -6,7 +6,7 @@
 }: let
   inherit (lib.modules) mkIf mkDefault mkDerivedConfig;
   inherit (lib.options) mkOption mkEnableOption;
-  inherit (lib.strings) hasPrefix concatStringsSep;
+  inherit (lib.strings) hasPrefix;
   inherit (lib.lists) filter map;
   inherit (lib.attrsets) filterAttrs mapAttrs' attrValues;
   inherit (lib.types) bool submodule str path attrsOf nullOr lines;
@@ -157,13 +157,11 @@ in {
             if file.clobber
             then "L+"
             else "L";
-
+        in
           # Constructed rule string that consists of the type, target, and source
           # of a tmpfile. Files with 'null' sources are filtered before the rule
           # is constructed.
-          ruleString = [mode "'${file.target}' - - - -" file.source];
-        in
-          concatStringsSep " " ruleString
+          "${mode} '${file.target}' - - - - ${file.source}"
       ) (filter (f: f.enable && f.source != null) (attrValues files));
     }) (filterAttrs (_: u: u.files != {}) config.homes);
   };
