@@ -89,9 +89,9 @@
 
       config = {
         target = mkDefault name;
-        source = mkIf (config.text != null) (mkDerivedConfig options.text (pkgs.writeTextFile {
-          inherit name;
-          inherit (config) text executable;
+        source = mkIf (config.text != null) (mkDerivedConfig options.text (text: pkgs.writeTextFile {
+          inherit name text;
+          inherit (config) executable;
         }));
       };
     });
