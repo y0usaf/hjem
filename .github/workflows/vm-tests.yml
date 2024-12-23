@@ -1,0 +1,41 @@
+name: Run VM tests
+
+on:
+  workflow_call:
+  pull_request:
+  push:
+    branches:
+      - main
+jobs:
+  nix:
+    strategy:
+      matrix:
+        system:
+          - x86_64-linux
+          - aarch64-linux
+
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Set up QEMU support"
+        uses: docker/setup-qemu-action@v3
+        with:
+          platforms: arm64
+
+      - name: Install Nix
+        uses: DeterminateSystems/nix-installer-action@main
+        with:
+          diagnostic-endpoint: "" # no personalized self-merges tyvm.
+          logger: pretty
+          extra-conf: |
+            experimental-features = nix-command flakes
+            allow-import-from-derivation = false
+            extra-platforms = aarch64-linux
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # For now, only a basic test exists and thus we only build that. In the future
+      # we may consider chaining matrix.system and matrix.check to build more tests
+      # for each individual system.
+      - name: Build packages
+        run: nix build -L .#checks.${{ matrix.system }}.hjem-basic -v
