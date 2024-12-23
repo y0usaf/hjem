@@ -1,0 +1,3 @@
+# Nix build/test artifacts
+.nixos-test-history
+result*
