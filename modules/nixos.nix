@@ -5,7 +5,7 @@
   ...
 }: let
   inherit (lib.modules) mkIf mkDefault mkDerivedConfig;
-  inherit (lib.options) mkOption mkEnableOption literalMD;
+  inherit (lib.options) mkOption mkEnableOption literalExpression;
   inherit (lib.strings) hasPrefix;
   inherit (lib.lists) filter map;
   inherit (lib.attrsets) filterAttrs mapAttrs' attrValues;
@@ -72,7 +72,7 @@
         clobber = mkOption {
           type = bool;
           default = cfg.clobberByDefault;
-          defaultText = literalMD "Set to the value of {option}`hjem.clobberByDefault`";
+          defaultText = literalExpression "config.hjem.clobberByDefault";
           description = ''
             Whether to "clobber", i.e., override existing target paths.
 
