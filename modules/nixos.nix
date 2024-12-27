@@ -12,6 +12,7 @@
   inherit (lib.types) bool submodule str path attrsOf nullOr lines;
 
   usrCfg = config.users.users;
+  cfg = config.hjem;
 
   fileType = relativeTo:
     submodule ({
@@ -89,14 +90,15 @@
 
       config = {
         target = mkDefault name;
-        source = mkIf (config.text != null) (mkDerivedConfig options.text (text: pkgs.writeTextFile {
-          inherit name text;
-          inherit (config) executable;
-        }));
+        source = mkIf (config.text != null) (mkDerivedConfig options.text (text:
+          pkgs.writeTextFile {
+            inherit name text;
+            inherit (config) executable;
+          }));
       };
     });
 
-  homeOpts = {
+  userOpts = {
     name,
     config,
     ...
@@ -134,10 +136,17 @@
     };
   };
 in {
-  options = {
-    homes = mkOption {
+  imports = [
+    # This should be removed in the future, since 'homes' is a very vague
+    # namespace to occupy. Added 2024-12-27, remove 2025-01-27 to allow
+    # sufficient time to migrate.
+    (lib.mkRenamedOptionModule ["homes"] ["hjem" "users"])
+  ];
+
+  options.hjem = {
+    users = mkOption {
       default = {};
-      type = attrsOf (submodule homeOpts);
+      type = attrsOf (submodule userOpts);
       description = "Home configurations to be managed";
     };
   };
@@ -146,7 +155,7 @@ in {
     users.users = mapAttrs' (name: {packages, ...}: {
       inherit name;
       value.packages = packages;
-    }) (filterAttrs (_: u: u.packages != []) config.homes);
+    }) (filterAttrs (_: u: u.packages != []) cfg.users);
 
     systemd.user.tmpfiles.users = mapAttrs' (name: {files, ...}: {
       inherit name;
@@ -163,6 +172,6 @@ in {
           # is constructed.
           "${mode} '${file.target}' - - - - ${file.source}"
       ) (filter (f: f.enable && f.source != null) (attrValues files));
-    }) (filterAttrs (_: u: u.files != {}) config.homes);
+    }) (filterAttrs (_: u: u.files != {}) cfg.users);
   };
 }

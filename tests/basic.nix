@@ -18,7 +18,7 @@ in
           password = "";
         };
 
-        homes = {
+        hjem.users = {
           alice = {
             enable = true;
             packages = [pkgs.hello];
