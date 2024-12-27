@@ -35,7 +35,7 @@ may use to manage individual users' homes by leveraging the module system.
 
 ```nix
 {
-  homes = {
+  hjem.users = {
     alice.files = {
       # Write a text file in `/homes/alice/.config/foo`
       # with the contents bar
@@ -50,10 +50,10 @@ may use to manage individual users' homes by leveraging the module system.
 }
 ```
 
-Each attribute under `homes`, e.g., `homes.alice` and `homes.jane` represent a
-user managed via `users.users` in NixOS. If a user does not exist, then Hjem
-will refuse to manage their `$HOME` by filtering non-existent users in file
-creation.
+Each attribute under `hjem.users`, e.g., `hjem.users.alice` or `hjem.users.jane`
+represent a user managed via `users.users` in NixOS. If a user does not exist,
+then Hjem will refuse to manage their `$HOME` by filtering non-existent users in
+file creation.
 
 ## Module Interface
 
@@ -65,7 +65,7 @@ they see fit.
 Below is a live implementation of the module.
 
 ```nix
-nix-repl> :p nixosConfigurations."nixos".config.homes
+nix-repl> :p nixosConfigurations."nixos".config.hjem.users
 {
   alice = {
     directory = "/home/alice";
@@ -107,7 +107,7 @@ iterations.
 
 ### Manifest & Cleaning up dangling files
 
-The systemd-tmpfiles module lacks a good way of cleaning up dangling lists,
+The systemd-tmpfiles module lacks a good way of cleaning up dangling files,
 e.g., from files that are no longer linked. To tackle this problem, a _manifest_
 of files can be used to diff said manifest during switch and remove files that
 are no longer managed.
@@ -128,7 +128,7 @@ module system exposes the files configuration to a package user provides.
 
 Special thanks to [Nixpkgs](https://github.com/nixOS/nixpkgs) and
 [Home-Manager](https://github.com/nix-community/home-manager). The interface of
-the `homes` module is inspired by Home-Manager's `home.file` and nixpkgs'
+the `hjem.users` module is inspired by Home-Manager's `home.file` and nixpkgs'
 `users.users` modules. Hjem would not be possible without any of those projects.
 
 ## License

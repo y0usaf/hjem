@@ -12,7 +12,8 @@ jobs:
       matrix:
         system:
           - x86_64-linux
-          - aarch64-linux
+        test:
+          - hjem-basic
 
     runs-on: ubuntu-latest
     steps:
@@ -34,8 +35,5 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # For now, only a basic test exists and thus we only build that. In the future
-      # we may consider chaining matrix.system and matrix.check to build more tests
-      # for each individual system.
       - name: Build packages
-        run: nix build -L .#checks.${{ matrix.system }}.hjem-basic -v
+        run: nix build -L .#checks.${{ matrix.system }}.${{ matrix.test }} -v

@@ -5,13 +5,14 @@
   ...
 }: let
   inherit (lib.modules) mkIf mkDefault mkDerivedConfig;
-  inherit (lib.options) mkOption mkEnableOption;
+  inherit (lib.options) mkOption mkEnableOption literalExpression;
   inherit (lib.strings) hasPrefix;
   inherit (lib.lists) filter map;
   inherit (lib.attrsets) filterAttrs mapAttrs' attrValues;
   inherit (lib.types) bool submodule str path attrsOf nullOr lines;
 
   usrCfg = config.users.users;
+  cfg = config.hjem;
 
   fileType = relativeTo:
     submodule ({
@@ -25,6 +26,7 @@
         enable = mkOption {
           type = bool;
           default = true;
+          example = false;
           description = ''
             Whether this file should be generated. This option allows specific
             files to be disabled.
@@ -69,11 +71,13 @@
 
         clobber = mkOption {
           type = bool;
-          default = false;
-          example = true;
+          default = cfg.clobberByDefault;
+          defaultText = literalExpression "config.hjem.clobberByDefault";
           description = ''
-            Whether to "clobber" existing target paths. While `true`, tmpfile rules will be constructed
-            with `L+` (*re*create) instead of `L` (create) type.
+            Whether to "clobber", i.e., override existing target paths.
+
+            While `true`, tmpfile rules will be constructed with `L+`
+            (*re*create) instead of `L` (create) type.
           '';
         };
 
@@ -89,14 +93,15 @@
 
       config = {
         target = mkDefault name;
-        source = mkIf (config.text != null) (mkDerivedConfig options.text (text: pkgs.writeTextFile {
-          inherit name text;
-          inherit (config) executable;
-        }));
+        source = mkIf (config.text != null) (mkDerivedConfig options.text (text:
+          pkgs.writeTextFile {
+            inherit name text;
+            inherit (config) executable;
+          }));
       };
     });
 
-  homeOpts = {
+  userOpts = {
     name,
     config,
     ...
@@ -134,10 +139,28 @@
     };
   };
 in {
-  options = {
-    homes = mkOption {
+  imports = [
+    # This should be removed in the future, since 'homes' is a very vague
+    # namespace to occupy. Added 2024-12-27, remove 2025-01-27 to allow
+    # sufficient time to migrate.
+    (lib.mkRenamedOptionModule ["homes"] ["hjem" "users"])
+  ];
+
+  options.hjem = {
+    clobberByDefault = mkOption {
+      type = bool;
+      default = false;
+      description = ''
+        The default override behaviour for files managed by Hjem.
+
+        While `true`, existing files will be overriden with new
+        files on rebuild.
+      '';
+    };
+
+    users = mkOption {
       default = {};
-      type = attrsOf (submodule homeOpts);
+      type = attrsOf (submodule userOpts);
       description = "Home configurations to be managed";
     };
   };
@@ -146,7 +169,7 @@ in {
     users.users = mapAttrs' (name: {packages, ...}: {
       inherit name;
       value.packages = packages;
-    }) (filterAttrs (_: u: u.packages != []) config.homes);
+    }) (filterAttrs (_: u: u.packages != []) cfg.users);
 
     systemd.user.tmpfiles.users = mapAttrs' (name: {files, ...}: {
       inherit name;
@@ -163,6 +186,6 @@ in {
           # is constructed.
           "${mode} '${file.target}' - - - - ${file.source}"
       ) (filter (f: f.enable && f.source != null) (attrValues files));
-    }) (filterAttrs (_: u: u.files != {}) config.homes);
+    }) (filterAttrs (_: u: u.files != {}) cfg.users);
   };
 }
