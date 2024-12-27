@@ -9,7 +9,7 @@
     forAllSystems = nixpkgs.lib.genAttrs ["x86_64-linux" "aarch64-linux"];
   in {
     nixosModules = {
-      hjem = ./modules/nixos.nix;
+      hjem = ./modules/nixos;
       default = self.nixosModules.hjem;
     };
 
