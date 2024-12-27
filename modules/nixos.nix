@@ -5,7 +5,7 @@
   ...
 }: let
   inherit (lib.modules) mkIf mkDefault mkDerivedConfig;
-  inherit (lib.options) mkOption mkEnableOption;
+  inherit (lib.options) mkOption mkEnableOption literalMD;
   inherit (lib.strings) hasPrefix;
   inherit (lib.lists) filter map;
   inherit (lib.attrsets) filterAttrs mapAttrs' attrValues;
@@ -26,6 +26,7 @@
         enable = mkOption {
           type = bool;
           default = true;
+          example = false;
           description = ''
             Whether this file should be generated. This option allows specific
             files to be disabled.
@@ -70,11 +71,13 @@
 
         clobber = mkOption {
           type = bool;
-          default = false;
-          example = true;
+          default = cfg.clobberByDefault;
+          defaultText = literalMD "Set to the value of {option}`hjem.clobberByDefault`";
           description = ''
-            Whether to "clobber" existing target paths. While `true`, tmpfile rules will be constructed
-            with `L+` (*re*create) instead of `L` (create) type.
+            Whether to "clobber", i.e., override existing target paths.
+
+            While `true`, tmpfile rules will be constructed with `L+`
+            (*re*create) instead of `L` (create) type.
           '';
         };
 
@@ -144,6 +147,17 @@ in {
   ];
 
   options.hjem = {
+    clobberByDefault = mkOption {
+      type = bool;
+      default = false;
+      description = ''
+        The default override behaviour for files managed by Hjem.
+
+        While `true`, existing files will be overriden with new
+        files on rebuild.
+      '';
+    };
+
     users = mkOption {
       default = {};
       type = attrsOf (submodule userOpts);
