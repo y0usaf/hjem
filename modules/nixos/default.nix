@@ -78,7 +78,7 @@ in {
       users.users = mapAttrs' (name: {packages, ...}: {
         inherit name;
         value.packages = packages;
-      }) (filterAttrs (_: u: u.packages != []) cfg.users);
+      }) (filterAttrs (_: u: (u.enable && u.packages != [])) cfg.users);
 
       systemd.user.tmpfiles.users = mapAttrs' (name: {files, ...}: {
         inherit name;
@@ -95,7 +95,7 @@ in {
             # is constructed.
             "${mode} '${file.target}' - - - - ${file.source}"
         ) (filter (f: f.enable && f.source != null) (attrValues files));
-      }) (filterAttrs (_: u: u.files != {}) cfg.users);
+      }) (filterAttrs (_: u: (u.enable && u.files != {})) cfg.users);
     }
 
     (mkIf (cfg.users != {}) {
