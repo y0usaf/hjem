@@ -5,18 +5,18 @@
   ...
 }: let
   inherit (lib.modules) mkIf mkMerge;
-  inherit (lib.options) mkOption;
+  inherit (lib.options) mkOption literalExpression;
   inherit (lib.lists) filter map flatten concatLists;
   inherit (lib.attrsets) filterAttrs mapAttrs' attrValues mapAttrsToList;
   inherit (lib.trivial) flip;
-  inherit (lib.types) bool attrsOf submoduleWith listOf raw;
+  inherit (lib.types) bool attrsOf submoduleWith listOf raw attrs;
 
   cfg = config.hjem;
 
   hjemModule = submoduleWith {
     description = "Hjem NixOS module";
     class = "hjem";
-    specialArgs = {inherit pkgs lib;};
+    specialArgs = {inherit pkgs lib;} // cfg.extraSpecialArgs;
     modules = concatLists [
       [
         ({name, ...}: {
@@ -69,6 +69,16 @@ in {
         Additional modules to be evaluated as a part of the users module
         inside {option}`config.hjem.users.<name>`. This can be used to
         extend each user configuration with additional options.
+      '';
+    };
+
+    extraSpecialArgs = mkOption {
+      type = attrs;
+      default = {};
+      example = literalExpression "{ inherit inputs; }";
+      description = ''
+        Additional `specialArgs` are passed to Hjem, allowing extra arguments
+        to be passed down to to all imported modules.
       '';
     };
   };
