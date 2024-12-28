@@ -11,6 +11,8 @@
   inherit (lib.trivial) flip;
   inherit (lib.types) bool attrsOf submoduleWith listOf raw;
 
+  cfg = config.hjem;
+
   hjemModule = submoduleWith {
     description = "Hjem NixOS module";
     class = "hjem";
@@ -23,6 +25,7 @@
           config = {
             user = config.users.users.${name}.name;
             directory = config.users.users.${name}.home;
+            clobberFiles = cfg.clobberByDefault;
           };
         })
       ]
@@ -32,8 +35,6 @@
       cfg.extraModules
     ];
   };
-
-  cfg = config.hjem;
 in {
   imports = [
     # This should be removed in the future, since 'homes' is a very vague
@@ -49,8 +50,9 @@ in {
       description = ''
         The default override behaviour for files managed by Hjem.
 
-        While `true`, existing files will be overriden with new
-        files on rebuild.
+        While `true`, existing files will be overriden with new files on rebuild.
+        The behaviour may be modified per-user by setting {option}`hjem.users.<name>.clobberFiles`
+        to the desired value.
       '';
     };
 

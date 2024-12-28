@@ -12,7 +12,7 @@
   inherit (lib.strings) hasPrefix;
   inherit (lib.types) bool submodule str path attrsOf nullOr lines listOf package;
 
-  cfg = config.hjem;
+  clobberOpt = config.clobberFiles;
 
   fileType = relativeTo:
     submodule ({
@@ -71,7 +71,7 @@
 
         clobber = mkOption {
           type = bool;
-          default = cfg.clobberByDefault;
+          default = clobberOpt;
           defaultText = literalExpression "config.hjem.clobberByDefault";
           description = ''
             Whether to "clobber" existing target paths. While `true`, tmpfile rules will be constructed
@@ -116,6 +116,18 @@ in {
       description = ''
         The home directory for the user, to which files configured in
         {option}`hjem.users.<name>.files` will be relative to by default.
+      '';
+    };
+
+    clobberFiles = mkOption {
+      type = bool;
+      description = ''
+        The default override behaviour for files managed by Hjem for a
+        particular user.
+
+        A top level option exists under the Hjem module option
+        {option}`hjem.clobberByDefault`. Per-file behaviour can be modified
+        with {option}`hjem.users.<name>.files.<file>.clobber`.
       '';
     };
 
