@@ -28,8 +28,8 @@
           default = true;
           example = false;
           description = ''
-            Whether this file should be generated. This option allows specific
-            files to be disabled.
+            Whether this file should be generated. If set to `false`, the file will
+            not be created.
           '';
         };
 
@@ -48,22 +48,19 @@
         text = mkOption {
           default = null;
           type = nullOr lines;
-          description = ''
-            Text of the file.
-          '';
+          description = "Text of the file";
         };
 
         source = mkOption {
           type = nullOr path;
           default = null;
-          description = ''
-            Path of the source file or directory.
-          '';
+          description = "Path of the source file or directory";
         };
 
         executable = mkOption {
           type = bool;
           default = false;
+          example = true;
           description = ''
             Whether to set the execute bit on the target file.
           '';
@@ -100,7 +97,8 @@
     });
 in {
   imports = [
-    # Makes "assertions" option available
+    # Makes "assertions" option available without having to duplicate the work
+    # already done in the Nixpkgs module.
     (pkgs.path + "/nixos/modules/misc/assertions.nix")
   ];
 
@@ -121,6 +119,7 @@ in {
 
     clobberFiles = mkOption {
       type = bool;
+      example = true;
       description = ''
         The default override behaviour for files managed by Hjem for a
         particular user.
@@ -134,12 +133,14 @@ in {
     files = mkOption {
       default = {};
       type = attrsOf (fileType config.directory);
-      description = "Files to be managed, inserted to relevant systemd-tmpfiles rules";
+      example = {".config/foo.txt".source = "Hello World";};
+      description = "Files to be managed by Hjem";
     };
 
     packages = mkOption {
       type = listOf package;
       default = [];
+      example = literalExpression "[pkgs.hello]";
       description = "Packages for ${config.user}";
     };
   };
