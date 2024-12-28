@@ -71,8 +71,11 @@
           default = clobberOpt;
           defaultText = literalExpression "config.hjem.clobberByDefault";
           description = ''
-            Whether to "clobber" existing target paths. While `true`, tmpfile rules will be constructed
-            with `L+` (*re*create) instead of `L` (create) type.
+            Whether to "clobber" existing target paths.
+
+            - If using the **systemd-tmpfiles** hook (Linux only), tmpfile rules
+              will be constructed with `L+` (*re*create) instead of `L`
+              (create) type while this is set to `true`.
           '';
         };
 
