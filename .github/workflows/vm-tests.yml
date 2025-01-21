@@ -12,8 +12,10 @@ jobs:
       matrix:
         system:
           - x86_64-linux
+          - aarch64-linux
         test:
           - hjem-basic
+          - hjem-special-args
 
     runs-on: ubuntu-latest
     steps:
