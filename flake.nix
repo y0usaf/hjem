@@ -20,6 +20,7 @@
       };
     in {
       hjem-basic = import ./tests/basic.nix checkArgs;
+      hjem-special-args = import ./tests/special-args.nix checkArgs;
     });
 
     formatter = forAllSystems (system: nixpkgs.legacyPackages.${system}.alejandra);
