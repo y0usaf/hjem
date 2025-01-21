@@ -1,6 +1,7 @@
 # The common module that contains Hjem's per-user options. To ensure Hjem remains
-# somewhat compliant with cross-platform paradigms (e.g. NixOS or Darwin) distro
-# specific options, such as packages, must be avoided here.
+# somewhat compliant with cross-platform paradigms (e.g. NixOS or Darwin.) Platform
+# specific options such as nixpkgs module system or nix-darwin module system should
+# be avoided here.
 {
   config,
   pkgs,

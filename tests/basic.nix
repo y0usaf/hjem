@@ -1,7 +1,7 @@
 let
   userHome = "/home/alice";
 in
-  (import ./lib.nix) {
+  (import ./lib) {
     name = "hjem-basic";
     nodes = {
       node1 = {
