@@ -16,7 +16,7 @@
   hjemModule = submoduleWith {
     description = "Hjem NixOS module";
     class = "hjem";
-    specialArgs = {inherit pkgs lib;} // cfg.extraSpecialArgs;
+    specialArgs = {inherit pkgs lib;} // cfg.specialArgs;
     modules = concatLists [
       [
         ({name, ...}: {
@@ -41,6 +41,10 @@ in {
     # namespace to occupy. Added 2024-12-27, remove 2025-01-27 to allow
     # sufficient time to migrate.
     (lib.mkRenamedOptionModule ["homes"] ["hjem" "users"])
+
+    # 'extraSpecialArgs' is confusing and obscure. 'hjem.specialArgs' better
+    # describes what the option is really for.
+    (lib.mkRenamedOptionModule ["hjem" "extraSpecialArgs"] ["hjem" "specialArgs"])
   ];
 
   options.hjem = {
@@ -72,7 +76,7 @@ in {
       '';
     };
 
-    extraSpecialArgs = mkOption {
+    specialArgs = mkOption {
       type = attrs;
       default = {};
       example = literalExpression "{ inherit inputs; }";
