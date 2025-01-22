@@ -3,7 +3,7 @@
 </h1>
 
 <div align="center">
-  A streamlined way to manage your <code>$HOME</code> for NixOS systems.
+  A streamlined way to manage your <code>$HOME</code> with Nix.
 </div>
 
 <div align="center">
@@ -16,7 +16,9 @@
 
 ## What is this?
 
-**Hjem** ("home" in Danish) is a NixOS module that implements a simple and
+[systemd-tmpfiles]: https://www.freedesktop.org/software/systemd/man/latest/systemd-tmpfiles-setup.service.html
+
+**Hjem** ("home" in Danish) is a module system that implements a simple and
 streamlined way to manage files in your `$HOME`, such as but not limited to
 files in your `~/.config`.
 
@@ -25,8 +27,10 @@ files in your `~/.config`.
 1. Multi-user by default
 2. Small, simple codebase with minimal abstraction
 3. Powerful `$HOME` management functionality and potential
-4. Systemd-native file management via systemd-tmpfiles
+4. Systemd-native file management via [systemd-tmpfiles]\*
 5. Extensible for 3rd-party use
+
+\*: Alternative linkers are planned for better non-NixOS support
 
 ### Implementation
 
@@ -92,8 +96,6 @@ nix-repl> :p nixosConfigurations."nixos".config.systemd.user.tmpfiles.users
 }
 ```
 
-[systemd-tmpfiles]: https://man7.org/linux/man-pages/man8/systemd-tmpfiles.8.html
-
 Instead of relying on a Bash script to link files in place, we utilize
 [systemd-tmpfiles] to ensure the files are linked in place.
 
@@ -112,6 +114,8 @@ e.g., from files that are no longer linked. To tackle this problem, a _manifest_
 of files can be used to diff said manifest during switch and remove files that
 are no longer managed.
 
+Relevant: https://github.com/feel-co/hjem/pull/9
+
 ### Alternative or/and configurable file linking mechanisms
 
 Hjem currently utilizes systemd-tmpfiles to ensure the files are linked in
@@ -126,10 +130,20 @@ module system exposes the files configuration to a package user provides.
 
 ## Attributions
 
-Special thanks to [Nixpkgs](https://github.com/nixOS/nixpkgs) and
-[Home-Manager](https://github.com/nix-community/home-manager). The interface of
-the `hjem.users` module is inspired by Home-Manager's `home.file` and nixpkgs'
-`users.users` modules. Hjem would not be possible without any of those projects.
+[Nixpkgs]: https://github.com/nixOS/nixpkgs
+[Home-Manager]: https://github.com/nix-community/home-manager
+
+Special thanks to [Nixpkgs] and [Home-Manager]. The interface of the
+`hjem.users` module is inspired by Home-Manager's `home.file` and nixpkgs'
+`users.users` modules. What is now Hjem also started as an experimental module
+addition to Nixpkgs' `users.users`. Hjem would not be possible without any of
+those projects, thank you!
+
+A worthy project of note is [Hjem Rum](https://github.com/snugnug/hjem-rum) by
+[@LunarNovaa](https://github.com/lunarnovaa) that establishes a module system,
+similar to the one of Home-Manager, for users less comfortable with manually
+linking files in place. If you wish to utlize the power of Hjem, but want an
+easier interface we encourage you to take a look at Hjem-Rum.
 
 ## License
 
