@@ -7,35 +7,36 @@ on:
     branches:
       - main
 jobs:
-  nix:
+  vm-tests:
     strategy:
       matrix:
-        system:
-          - x86_64-linux
-          - aarch64-linux
-        test:
-          - hjem-basic
-          - hjem-special-args
+        include:
+          - os: ubuntu-latest # x86
+            system: "x86_64-linux"
+            test: hjem-basic
+          - os: ubuntu-22.04-arm # aarch64
+            system: "aarch64-linux"
+            test: hjem-basic
+          - os: ubuntu-latest
+            system: "x86_64-linux"
+            test: hjem-special-args
+          - os: ubuntu-22.04-arm
+            system: "aarch64-linux"
+            test: hjem-special-args
 
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     steps:
-      - name: "Set up QEMU support"
-        uses: docker/setup-qemu-action@v3
-        with:
-          platforms: arm64
-
       - name: Install Nix
         uses: DeterminateSystems/nix-installer-action@main
         with:
-          diagnostic-endpoint: "" # no personalized self-merges tyvm.
-          logger: pretty
+          diagnostic-endpoint: ""
           extra-conf: |
             experimental-features = nix-command flakes
+            system-features = kvm nixos-test
             allow-import-from-derivation = false
-            extra-platforms = aarch64-linux
 
       - name: Checkout
         uses: actions/checkout@v4
 
       - name: Build packages
-        run: nix build -L .#checks.${{ matrix.system }}.${{ matrix.test }} -v
+        run: nix build -L .#checks.${{ matrix.system }}.${{ matrix.test }}
