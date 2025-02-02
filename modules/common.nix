@@ -8,10 +8,13 @@
   lib,
   ...
 }: let
+  inherit (lib.attrsets) mapAttrsToList;
+  inherit (lib.lists) isList;
+  inherit (lib.strings) concatStringsSep;
   inherit (lib.modules) mkIf mkDefault mkDerivedConfig;
   inherit (lib.options) mkOption mkEnableOption literalExpression;
   inherit (lib.strings) hasPrefix;
-  inherit (lib.types) bool submodule str path attrsOf nullOr lines listOf package;
+  inherit (lib.types) bool submodule str path attrsOf nullOr lines listOf package oneOf int;
 
   clobberOpt = config.clobberFiles;
 
@@ -99,6 +102,18 @@
           }));
       };
     });
+
+  toEnv = env:
+    if isList env
+    then concatStringsSep ":" (map toString env)
+    else toString env;
+
+  mkEnvVars = vars: (concatStringsSep "\n"
+    (mapAttrsToList (name: value: "export ${name}=\"${toEnv value}\"") vars));
+
+  writeEnvScript = attrs:
+    pkgs.writeShellScript "load-env"
+    (mkEnvVars attrs);
 in {
   imports = [
     # Makes "assertions" option available without having to duplicate the work
@@ -147,9 +162,37 @@ in {
       example = literalExpression "[pkgs.hello]";
       description = "Packages for ${config.user}";
     };
+
+    environment = {
+      loadEnv = mkOption {
+        type = path;
+        readOnly = true;
+        description = ''
+          A POSIX compliant shell script containing the user session variables needed to bootstrap the session.
+
+          As there is no reliable and agnostic way of setting session variables, Hjem's
+          environment module does nothing by itself. Rather, it provides a POSIX compliant shell script
+          that needs to be sourced where needed.
+        '';
+      };
+      sessionVariables = mkOption {
+        type = attrsOf (oneOf [(listOf (oneOf [int str path])) int str path]);
+        default = {};
+        example = {
+          EDITOR = "nvim";
+          VISUAL = "nvim";
+        };
+        description = ''
+          A set of environment variables used in the user environment.
+          If a list of strings is used, they will be concatenated with colon
+          characters.
+        '';
+      };
+    };
   };
 
   config = {
+    environment.loadEnv = mkIf (config.environment.sessionVariables != {}) (writeEnvScript config.environment.sessionVariables);
     assertions = [
       {
         assertion = config.user != "";
