@@ -147,5 +147,6 @@ easier interface we encourage you to take a look at Hjem-Rum.
 
 ## License
 
-This project is made available under the GPLv3 license. See [LICENSE](LICENSE)
-for more details on the exact conditions.
+This project is made available under Mozilla Public License (MPL) version 2.0.
+See [LICENSE](LICENSE) for more details on the exact conditions. An online copy
+is provided [here](https://www.mozilla.org/en-US/MPL/2.0/).
