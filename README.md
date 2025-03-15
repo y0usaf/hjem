@@ -78,7 +78,7 @@ nix-repl> :p nixosConfigurations."nixos".config.hjem.users
       ".config/foo" = {
         enable = true;
         executable = false;
-        recursive = false;
+        clobber = false;
         source = «derivation /nix/store/prc0c5yrfca63x987f2k9khpfhlfnq15-config-foo.drv»;
         target = ".config/foo";
         text = "bar";
