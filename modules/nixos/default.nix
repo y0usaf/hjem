@@ -16,7 +16,12 @@
   hjemModule = submoduleWith {
     description = "Hjem NixOS module";
     class = "hjem";
-    specialArgs = {inherit pkgs lib;} // cfg.specialArgs;
+    specialArgs =
+      {
+        inherit pkgs lib;
+        osConfig = config;
+      }
+      // cfg.specialArgs;
     modules = concatLists [
       [
         ({name, ...}: {
