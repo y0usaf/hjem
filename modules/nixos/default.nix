@@ -41,17 +41,6 @@
     ];
   };
 in {
-  imports = [
-    # This should be removed in the future, since 'homes' is a very vague
-    # namespace to occupy. Added 2024-12-27, remove 2025-01-27 to allow
-    # sufficient time to migrate.
-    (lib.mkRenamedOptionModule ["homes"] ["hjem" "users"])
-
-    # 'extraSpecialArgs' is confusing and obscure. 'hjem.specialArgs' better
-    # describes what the option is really for.
-    (lib.mkRenamedOptionModule ["hjem" "extraSpecialArgs"] ["hjem" "specialArgs"])
-  ];
-
   options.hjem = {
     clobberByDefault = mkOption {
       type = bool;
