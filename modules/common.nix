@@ -9,14 +9,14 @@
   ...
 }: let
   inherit (lib.attrsets) mapAttrsToList;
-  inherit (lib.strings) concatMapStringsSep concatLines;
+  inherit (lib.lists) isList;
+  inherit (lib.strings) concatStringsSep;
   inherit (lib.modules) mkIf mkDefault mkDerivedConfig;
-  inherit (lib.options) mkOption literalExpression mkEnableOption;
+  inherit (lib.options) mkOption mkEnableOption literalExpression;
   inherit (lib.strings) hasPrefix;
   inherit (lib.types) bool submodule str path attrsOf nullOr lines listOf package oneOf int;
-  inherit (builtins) isList;
 
-  cfg = config;
+  clobberOpt = config.clobberFiles;
 
   fileType = relativeTo:
     submodule ({
@@ -27,12 +27,15 @@
       ...
     }: {
       options = {
-        enable =
-          mkEnableOption "creation of this file"
-          // {
-            default = true;
-            example = false;
-          };
+        enable = mkOption {
+          type = bool;
+          default = true;
+          example = false;
+          description = ''
+            Whether this file should be generated. If set to `false`, the file will
+            not be created.
+          '';
+        };
 
         target = mkOption {
           type = str;
@@ -42,7 +45,7 @@
             else "${config.relativeTo}/${p}";
           defaultText = "name";
           description = ''
-            Path to target file relative to {option}`hjem.users.<name>.files.<file>.relativeTo`.
+            Path to target file relative to ${config.relativeTo}.
           '';
         };
 
@@ -69,7 +72,7 @@
 
         clobber = mkOption {
           type = bool;
-          default = cfg.clobberFiles;
+          default = clobberOpt;
           defaultText = literalExpression "config.hjem.clobberByDefault";
           description = ''
             Whether to "clobber" existing target paths.
@@ -99,6 +102,18 @@
           }));
       };
     });
+
+  toEnv = env:
+    if isList env
+    then concatStringsSep ":" (map toString env)
+    else toString env;
+
+  mkEnvVars = vars: (concatStringsSep "\n"
+    (mapAttrsToList (name: value: "export ${name}=\"${toEnv value}\"") vars));
+
+  writeEnvScript = attrs:
+    pkgs.writeShellScript "load-env"
+    (mkEnvVars attrs);
 in {
   imports = [
     # Makes "assertions" option available without having to duplicate the work
@@ -107,13 +122,7 @@ in {
   ];
 
   options = {
-    enable =
-      mkEnableOption "home management for this user"
-      // {
-        default = true;
-        example = false;
-      };
-
+    enable = mkEnableOption "Whether to enable home management for this user" // {default = true;};
     user = mkOption {
       type = str;
       description = "The owner of a given home directory.";
@@ -142,7 +151,7 @@ in {
 
     files = mkOption {
       default = {};
-      type = attrsOf (fileType cfg.directory);
+      type = attrsOf (fileType config.directory);
       example = {".config/foo.txt".source = "Hello World";};
       description = "Files to be managed by Hjem";
     };
@@ -151,7 +160,7 @@ in {
       type = listOf package;
       default = [];
       example = literalExpression "[pkgs.hello]";
-      description = "Packages to install for this user";
+      description = "Packages for ${config.user}";
     };
 
     environment = {
@@ -183,25 +192,14 @@ in {
   };
 
   config = {
-    environment.loadEnv = let
-      toEnv = env:
-        if isList env
-        then concatMapStringsSep ":" toString env
-        else toString env;
-    in
-      lib.pipe cfg.environment.sessionVariables [
-        (mapAttrsToList (name: value: "export ${name}=\"${toEnv value}\""))
-        concatLines
-        (pkgs.writeShellScript "load-env")
-      ];
-
+    environment.loadEnv = mkIf (config.environment.sessionVariables != {}) (writeEnvScript config.environment.sessionVariables);
     assertions = [
       {
-        assertion = cfg.user != "";
+        assertion = config.user != "";
         message = "A user must be configured in 'hjem.users.<user>.name'";
       }
       {
-        assertion = cfg.directory != "";
+        assertion = config.directory != "";
         message = "A home directory must be configured in 'hjem.users.<user>.directory'";
       }
     ];
