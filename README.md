@@ -61,10 +61,10 @@ file creation.
 
 ## Module Interface
 
-The interface for the `homes` module is conceptually very similar to
-Home-Manager, but it does not act as a collection of modules like Home-Manager.
-We only implement basic features, and leave abstraction to the user to do as
-they see fit.
+The interface for the `homes` module is conceptually very similar to Home
+Manager, but it does not act as a collection of modules like Home Manager. We
+only implement basic features, and leave abstraction to the user to do as they
+see fit.
 
 Below is a live implementation of the module.
 
@@ -102,7 +102,7 @@ Instead of relying on a Bash script to link files in place, we utilize
 ## Things to do
 
 Hjem is mostly feature-complete, in the sense that it is a clean implementation
-of `home.files` in Home-Manager: it was never a goal to dive into abstracting
+of `home.files` in Home Manager: it was never a goal to dive into abstracting
 files into modules. Although, some _basic_ features such as managing _Systemd
 Services_ or user packages may make their ways into the project in future
 iterations.
@@ -131,19 +131,20 @@ module system exposes the files configuration to a package user provides.
 ## Attributions
 
 [Nixpkgs]: https://github.com/nixOS/nixpkgs
-[Home-Manager]: https://github.com/nix-community/home-manager
+[Home Manager]: https://github.com/nix-community/home-manager
 
-Special thanks to [Nixpkgs] and [Home-Manager]. The interface of the
-`hjem.users` module is inspired by Home-Manager's `home.file` and nixpkgs'
-`users.users` modules. What is now Hjem also started as an experimental module
+Special thanks to [Nixpkgs] and [Home Manager]. The interface of the
+`hjem.users` module is inspired by Home Manager's `home.file` and Nixpkgs'
+`users.users` modules. What is now Hjem started as an experimental module
 addition to Nixpkgs' `users.users`. Hjem would not be possible without any of
 those projects, thank you!
 
-A worthy project of note is [Hjem Rum](https://github.com/snugnug/hjem-rum) by
-[@LunarNovaa](https://github.com/lunarnovaa) that establishes a module system,
-similar to the one of Home-Manager, for users less comfortable with manually
-linking files in place. If you wish to utlize the power of Hjem, but want an
-easier interface we encourage you to take a look at Hjem-Rum.
+A project worthy of note is [Hjem Rum](https://github.com/snugnug/hjem-rum), by
+[@Lunarnovaa](https://github.com/lunarnovaa) and
+[@nezia1](https://github.com/nezia1), which establishes a Home Manager-like
+module system for users less comfortable with manually linking files in place.
+If you wish to utilize the power of Hjem, but want an easier interface, we
+encourage you to take a look at Hjem Rum.
 
 ## License
 
