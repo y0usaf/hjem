@@ -14,7 +14,6 @@
   inherit (lib.options) mkOption literalExpression mkEnableOption;
   inherit (lib.strings) hasPrefix;
   inherit (lib.types) bool submodule str path attrsOf nullOr lines listOf package oneOf int enum;
-  inherit (lib.trivial) xor;
   inherit (builtins) isList;
 
   cfg = config;
