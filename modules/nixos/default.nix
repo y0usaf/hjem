@@ -37,12 +37,25 @@
       ) []
       files;
 
-    writeManifest = username:
-      pkgs.writeTextDir "manifest-${username}.json" (builtins.toJSON {
-        clobber_by_default = cfg.users."${username}".clobberFiles;
-        version = 1;
-        files = mapFiles username cfg.users."${username}".files;
-      });
+    writeManifest = username: let
+      name = "manifest-${username}.json";
+    in
+      pkgs.writeTextFile {
+        inherit name;
+        destination = "/${name}";
+        text = builtins.toJSON {
+          clobber_by_default = cfg.users."${username}".clobberFiles;
+          version = 1;
+          files = mapFiles username cfg.users."${username}".files;
+        };
+        checkPhase = ''
+          set -e
+          CUE_CACHE_DIR=$(pwd)/.cache
+          CUE_CONFIG_DIR=$(pwd)/.config
+
+          ${lib.getExe pkgs.cue} vet -c ${../../manifest/v1.cue} $target
+        '';
+      };
   in
     pkgs.symlinkJoin
     {
