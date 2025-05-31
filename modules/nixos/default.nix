@@ -9,9 +9,9 @@
   inherit (lib.options) literalExpression mkOption;
   inherit (lib.strings) optionalString;
   inherit (lib.trivial) pipe;
-  inherit (lib.types) attrs attrsOf bool listOf nullOr package raw submoduleWith;
+  inherit (lib.types) attrs attrsOf bool listOf nullOr package raw submoduleWith either singleLineString;
   inherit (lib.meta) getExe;
-  inherit (builtins) filter attrValues mapAttrs getAttr concatLists;
+  inherit (builtins) filter attrValues mapAttrs getAttr concatLists concatStringsSep typeOf toJSON;
 
   cfg = config.hjem;
 
@@ -145,6 +145,17 @@ in {
       '';
       type = nullOr package;
     };
+
+    linkerOptions = mkOption {
+      default = [];
+      description = ''
+        Additional arguments to pass to the linker.
+        This is for external linker modules to set, to allow extending the default set of hjem behaviours.
+        It accepts either a list of strings, which will be passed directly as arguments, or an attribute set, which will be
+        serialized to JSON and passed as `--linker-opts options.json`.
+      '';
+      type = either (listOf singleLineString) attrs;
+    };
   };
 
   config = mkMerge [
@@ -208,16 +219,21 @@ in {
         systemd.services.hjem-activate = {
           requiredBy = ["sysinit-reactivation.target"];
           before = ["sysinit-reactivation.target"];
-          script = ''
+          script = let
+            linkerOpts =
+              if (typeOf cfg.linkerOptions == "set")
+              then ''--linker-opts "${toJSON cfg.linkerOptions}"''
+              else concatStringsSep " " cfg.linkerOptions;
+          in ''
             mkdir -p /var/lib/hjem
 
             for manifest in ${manifests}/*; do
               if [ ! -f /var/lib/hjem/$(basename $manifest) ]; then
-                ${linker} activate $manifest
+                ${linker} ${linkerOpts} activate $manifest
                 continue
               fi
 
-              ${linker} diff $manifest /var/lib/hjem/$(basename $manifest)
+              ${linker} ${linkerOpts} diff $manifest /var/lib/hjem/$(basename $manifest)
             done
 
             cp -rT ${manifests} /var/lib/hjem
