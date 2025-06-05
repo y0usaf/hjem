@@ -87,30 +87,25 @@ in {
       }))
     ];
 
-    # Constructed rule string that consists of the type, target, and source
-    # of a tmpfile. Files with 'null' sources are filtered before the rule
-    # is constructed.
-    systemd.user.tmpfiles.users =
-      mapAttrs (_: {
-        enable,
-        files,
-        ...
-      }: {
-        rules =
-          mkIf enable
-          (
-            pipe files [
-              attrValues
-              (filter (f: f.enable && f.source != null))
-              (map (
-                file:
-                # L+ will recreate, i.e., clobber existing files.
-                "L${optionalString file.clobber "+"} '${file.target}' - - - - ${file.source}"
-              ))
-            ]
-          );
-      })
-      cfg.users;
+    systemd.user.tmpfiles.users = let
+      # Constructs a rule string for each tmpfile that consists of the type,
+      # target, and source.
+      filesToRules = files:
+        pipe files [
+          attrValues
+          # Filter files with 'null' sources before we construct rules
+          (filter (f: f.enable && f.source != null))
+          (map (
+            file: "L${optionalString file.clobber "+"} '${file.target}' - - - - ${file.source}"
+          ))
+        ];
+    in
+      pipe cfg.users [
+        (filterAttrs (_: user: user.enable))
+        (mapAttrs (_: user: {
+          rules = filesToRules user.files;
+        }))
+      ];
 
     warnings =
       concatLists
