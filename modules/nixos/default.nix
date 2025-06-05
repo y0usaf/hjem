@@ -9,7 +9,7 @@
   inherit (lib.trivial) pipe;
   inherit (lib.strings) optionalString;
   inherit (lib.attrsets) mapAttrsToList;
-  inherit (lib.types) bool attrsOf submoduleWith listOf raw attrs submodule;
+  inherit (lib.types) bool attrsOf submoduleWith listOf raw attrs;
   inherit (builtins) filter attrValues mapAttrs getAttr concatLists;
 
   cfg = config.hjem;
