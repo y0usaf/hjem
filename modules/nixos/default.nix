@@ -123,9 +123,8 @@ in {
         )
         cfg.users);
 
-    assertions =
-      concatLists
-      (mapAttrsToList (user: config:
+    assertions = let
+      mkUserAssertions = user: config:
         map ({
           assertion,
           message,
@@ -134,7 +133,9 @@ in {
           inherit assertion;
           message = "${user} profile: ${message}";
         })
-        config.assertions)
-      cfg.users);
+        config.assertions;
+    in
+      concatLists
+      (mapAttrsToList mkUserAssertions cfg.users);
   };
 }
