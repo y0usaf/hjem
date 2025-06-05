@@ -24,22 +24,19 @@
         osConfig = config;
       };
     modules =
-      concatLists
       [
-        [
-          ../common.nix
-          ({name, ...}: let
-            user = getAttr name config.users.users;
-          in {
-            user = user.name;
-            directory = user.home;
-            clobberFiles = cfg.clobberByDefault;
-          })
-        ]
-        # Evaluate additional modules under 'hjem.users.<name>' so that
-        # module systems built on Hjem are more ergonomic.
-        cfg.extraModules
-      ];
+        ../common.nix
+        ({name, ...}: let
+          user = getAttr name config.users.users;
+        in {
+          user = user.name;
+          directory = user.home;
+          clobberFiles = cfg.clobberByDefault;
+        })
+      ]
+      # Evaluate additional modules under 'hjem.users.<name>' so that
+      # module systems built on Hjem are more ergonomic.
+      ++ cfg.extraModules;
   };
 in {
   options.hjem = {
