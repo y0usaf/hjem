@@ -8,7 +8,7 @@
   inherit (lib.options) mkOption literalExpression;
   inherit (lib.trivial) pipe;
   inherit (lib.strings) optionalString;
-  inherit (lib.attrsets) mapAttrsToList;
+  inherit (lib.attrsets) mapAttrsToList filterAttrs;
   inherit (lib.types) bool attrsOf submoduleWith listOf raw attrs;
   inherit (builtins) filter attrValues mapAttrs getAttr concatLists;
 
@@ -80,7 +80,12 @@ in {
   };
 
   config = {
-    users.users = (mapAttrs (_: v: mkIf v.enable {inherit (v) packages;})) cfg.users;
+    users.users = pipe cfg.users [
+      (filterAttrs (_: user: user.enable))
+      (mapAttrs (_: user: {
+        inherit (user) packages;
+      }))
+    ];
 
     # Constructed rule string that consists of the type, target, and source
     # of a tmpfile. Files with 'null' sources are filtered before the rule
