@@ -34,6 +34,13 @@ in
           fileGetsLinked.configuration = {
             hjem.users.alice.files.".config/foo".text = "Hello world!";
           };
+
+          fileGetsOverwritten.configuration = {
+            hjem.users.alice.files.".config/foo" = {
+              text = "Hello new world!";
+              clobber = true;
+            };
+          };
         };
       };
     };
@@ -57,5 +64,10 @@ in
         node1.succeed("test -L ${userHome}/.config/foo")
         node1.succeed("grep \"Hello world!\" ${userHome}/.config/foo")
 
+      with subtest("File gets overwritten when changed"):
+        node1.succeed("${specialisations}/fileGetsLinked/bin/switch-to-configuration test")
+        node1.succeed("${specialisations}/fileGetsOverwritten/bin/switch-to-configuration test")
+        node1.succeed("test -L ${userHome}/.config/foo")
+        node1.succeed("grep \"Hello new world!\" ${userHome}/.config/foo")
     '';
   }
