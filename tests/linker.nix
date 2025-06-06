@@ -29,11 +29,18 @@ in
             };
           };
         };
+
+        specialisation = {
+          fileGetsLinked.configuration = {
+            hjem.users.alice.files.".config/foo".text = "Hello world!";
+          };
+        };
       };
     };
 
     testScript = {nodes, ...}: let
       baseSystem = nodes.node1.system.build.toplevel;
+      specialisations = "${baseSystem}/specialisation";
     in ''
       node1.succeed("loginctl enable-linger alice")
 
@@ -44,5 +51,11 @@ in
       with subtest("Manifest gets created"):
         node1.succeed("${baseSystem}/bin/switch-to-configuration test")
         node1.succeed("[ -f /var/lib/hjem/manifest-alice.json ]")
+
+      with subtest("File gets linked"):
+        node1.succeed("${specialisations}/fileGetsLinked/bin/switch-to-configuration test")
+        node1.succeed("test -L ${userHome}/.config/foo")
+        node1.succeed("grep \"Hello world!\" ${userHome}/.config/foo")
+
     '';
   }
