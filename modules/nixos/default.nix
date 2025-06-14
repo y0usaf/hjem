@@ -78,6 +78,7 @@
         [
           ../common/user.nix
           ./systemd.nix
+          ../xdg.nix
           ({name, ...}: let
             user = getAttr name config.users.users;
           in {
@@ -200,16 +201,28 @@ in {
       ];
 
       systemd.user.tmpfiles.users =
-        mapAttrs (_: u: {
-          rules = pipe u.files [
-            attrValues
-            (filter (f: f.enable && f.source != null))
-            (map (
-              file:
-              # L+ will recreate, i.e., clobber existing files.
-              "L${optionalString file.clobber "+"} '${file.target}' - - - - ${file.source}"
-            ))
-          ];
+        mapAttrs (_: {
+          enable,
+          files,
+          ...
+        }: {
+          rules =
+            mkIf enable
+            (
+              pipe files [
+                attrValues
+                (filter (f: f.enable && (f.source != null || f.type == "directory")))
+                (map (
+                  file:
+                    if file.type == "symlink"
+                    # L+ will recreate, i.e., clobber existing files.
+                    then "L${optionalString file.clobber "+"} '${file.target}' - - - - ${file.source}"
+                    else if file.type == "directory"
+                    then "d '${file.target}'"
+                    else throw "Invalid file type: ${file.type}"
+                ))
+              ]
+            );
         })
         enabledUsers;
     })
