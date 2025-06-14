@@ -77,6 +77,7 @@
       [
         [
           ../common/user.nix
+          ./systemd.nix
           ({name, ...}: let
             user = getAttr name config.users.users;
           in {
