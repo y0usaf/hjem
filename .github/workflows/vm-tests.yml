@@ -5,8 +5,7 @@ on:
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
   push:
-    branches:
-      - main
+    branches: [main]
 jobs:
   vm-tests:
     if: github.event.pull_request.draft == false
@@ -25,6 +24,12 @@ jobs:
           - os: ubuntu-22.04-arm
             system: "aarch64-linux"
             test: hjem-special-args
+          - os: ubuntu-latest
+            system: "x86_64-linux"
+            test: hjem-linker
+          - os: ubuntu-22.04-arm
+            system: "aarch64-linux"
+            test: hjem-linker
 
     runs-on: ${{ matrix.os }}
     steps:
